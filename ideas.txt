@@ -1,0 +1,9 @@
+Challenge
+- robot is in 2D world where there is trash and walls
+- it learns to look for and pick up all the trash.
+- what can it do / sense?
+  -- PICK_UP: try to pick up can where it is
+	-- MOVE: in a directoin (NESW)
+	-- LOOK: in a direction (8 choices)
+	  --- builds map of area?
+		--- can only see a certain distance (3-5? in an 8x8)
