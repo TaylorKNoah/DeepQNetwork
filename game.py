@@ -6,11 +6,9 @@ class Game:
 	robotLocation = []
 	numCans = 0
 
-	def __init__(self, size=8, canDensity=0.25, maxWallLength=4, wallDensity=0.8):
+	def __init__(self, size=8, canDensity=0.25):
 		self.size = size
 		self.canDensity = canDensity
-		self.maxWallLength = maxWallLength
-		self.wallDensity = wallDensity
 		self.initializeBoard()
 		self.initializeStartPointOfRobot()
 		return
@@ -49,11 +47,25 @@ class Game:
 		print("Robot start at: ", end=" ")
 		print(self.robotLocation)
 
+	def reset(self):
+		self.map.clear()
+		self.initializeBoard()
+		self.initializeStartPointOfRobot()
+		return self.getState()
+	
+	def getState(self):
+		state = []
+		state.append(self.map[self.robotLocation[0], self.robotLocation[1]].value)
+		state.append(self.map[self.robotLocation[0], self.robotLocation[1]-1].value)
+		state.append(self.map[self.robotLocation[0]+1, self.robotLocation[1]].value)
+		state.append(self.map[self.robotLocation[0], self.robotLocation[1]+1].value)
+		state.append(self.map[self.robotLocation[0]-1, self.robotLocation[1]].value)
+
 	def playGame(self):
 		self.displayStart()
+		self.displayBoard()
 		while(self.numCans > 0):
-			self.displayRound()
-			self.displayBoard()
+			#self.displayRound()
 			state = self.agent.observe(self.map)
 			action = self.agent.decideAction(state)
 			reward = self.determineReward(state, action)
@@ -79,10 +91,16 @@ class Game:
 					print(self.map[i][j].value)
 	
 	def determineReward(self, state, action):
-		reward = 0
-		if(action == Actions.PICK_UP):
-			if(state[0] == BoardState.Can):
+		if action == Actions.PICK_UP.value:
+			if state[0] == BoardState.Can:
 				reward = 10
-				self.map[self.robotLocation[0],self.robotLocation[1]] = BoardState.Empty
 			else:
 				reward = -5
+		else:
+			index = action.value
+			if state[index] == BoardState.Wall:
+				reward = -5
+			else:
+				reward = 1
+
+		return reward
