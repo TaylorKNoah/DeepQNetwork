@@ -14,15 +14,16 @@ class DeepQNetwork(nn.Module):
 		self.n_actions = number_of_actions
 
 		self.fc1 = nn.Linear(*self.input_dims, self.fullyConnected1_dims)
-		self.fc2 = nn.Linear(self,fullyConnected1_dims, self.fullyConnected2_dims)
+		self.fc2 = nn.Linear(self.fullyConnected1_dims, self.fullyConnected2_dims)
 		self.fc3 = nn.Linear(self.fullyConnected2_dims, self.n_actions)
 
-		self.optimizer = optim.Adam(self.paramters(), lr = learning_rate)
+		self.optimizer = optim.Adam(self.parameters(), lr = learning_rate)
 		self.loss = nn.MSELoss()
 		self.device = T.device('cuda:0' if T.cuda.is_available() else 'cpu')
 		self.to(self.device)
 
 	def forward(self, state):
+		if state.dtype != T.float32: state = state.to(T.float32)
 		x = F.relu(self.fc1(state))
 		x = F.relu(self.fc2(x))
 		actions = self.fc3(x)
@@ -52,7 +53,7 @@ class Agent():
 		self.new_state_memory = np.zeros((self.mem_size, *input_dims), dtype=np.float32)
 		self.action_memory = np.zeros(self.mem_size, dtype=np.int32)
 		self.reward_memory = np.zeros(self.mem_size, dtype=np.float32)
-		self.terminal_memory = np.seros(self.mem_size, dtype=np.bool)
+		self.terminal_memory = np.zeros(self.mem_size, dtype=np.bool)
 
 	def store_transition(self, state, action, reward, new_state, done):
 		first_unused_memory_index = self.mem_counter % self.mem_size

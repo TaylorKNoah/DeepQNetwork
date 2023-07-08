@@ -49,34 +49,77 @@ class Game:
 
 	def reset(self):
 		self.map.clear()
+		self.robotLocation.clear()
+		self.numCans = 0
 		self.initializeBoard()
 		self.initializeStartPointOfRobot()
 		return self.getState()
 	
 	def getState(self):
+		rawState = []
+		rawState.append(self.map[self.robotLocation[0]][self.robotLocation[1]].value)
+		rawState.append(self.map[self.robotLocation[0]][self.robotLocation[1]-1].value)
+		rawState.append(self.map[self.robotLocation[0]+1][self.robotLocation[1]].value)
+		rawState.append(self.map[self.robotLocation[0]][self.robotLocation[1]+1].value)
+		rawState.append(self.map[self.robotLocation[0]-1][self.robotLocation[1]].value)
+
 		state = []
-		state.append(self.map[self.robotLocation[0], self.robotLocation[1]].value)
-		state.append(self.map[self.robotLocation[0], self.robotLocation[1]-1].value)
-		state.append(self.map[self.robotLocation[0]+1, self.robotLocation[1]].value)
-		state.append(self.map[self.robotLocation[0], self.robotLocation[1]+1].value)
-		state.append(self.map[self.robotLocation[0]-1, self.robotLocation[1]].value)
+		for cell in rawState:
+			if cell == BoardState.Can.value[0]:
+				state.append(0)
+			elif cell == BoardState.Empty.value[0]:
+				state.append(1)
+			else:
+				state.append(2)
+		return state.copy()
 
-	def playGame(self):
-		self.displayStart()
-		self.displayBoard()
-		while(self.numCans > 0):
-			#self.displayRound()
-			state = self.agent.observe(self.map)
-			action = self.agent.decideAction(state)
-			reward = self.determineReward(state, action)
-			self.displayAgentInfo()
+	def step(self, action):
+		reward = self.determineReward(action)
+		new_state = self.applyAction(action)
+		done = self.isDone()
+		return reward, new_state, done
+		
+	def determineReward(self, action):
+		loc = self.robotLocation
+		if action == Actions.PICK_UP.value:
+			if self.map[loc[0]][loc[1]] == BoardState.Can:
+				reward = 10
+			else:
+				reward = -5
+		else:
+			ymod = 0
+			xmod = 0
+			if action == Actions.MOVE_NORTH.value: ymod -= 1
+			elif action == Actions.MOVE_SOUTH.value: ymod += 1
+			elif action == Actions.MOVE_EAST.value: xmod -= 1
+			elif action == Actions.MOVE_WEST.value: xmod += 1
+			if self.map[loc[0]+ymod][loc[1]+xmod] == BoardState.Wall:
+				reward = -5
+			else:
+				reward = 0.25
+		return reward
+	
+	def applyAction(self, action):
+		y = self.robotLocation[0]
+		x = self.robotLocation[1]
 
-	def displayStart(self):
-		print('========== Game Start! ==========')
-		print('Number of cans to find: '+str(self.numCans))
+		if action == Actions.PICK_UP.value:
+			if self.map[y][x] == BoardState.Can:
+				self.map[y][x] == BoardState.Empty
+				self.numCans -= 1
+		elif action == Actions.MOVE_NORTH.value and self.map[y-1][x] != BoardState.Wall:
+				self.robotLocation[0] -= 1
+		elif action == Actions.MOVE_SOUTH.value and self.map[y+1][x] != BoardState.Wall:
+			self.robotLocation[0] += 1
+		elif action == Actions.MOVE_EAST.value and self.map[y][x-1] != BoardState.Wall:
+			self.robotLocation[1] -= 1
+		elif action == Actions.MOVE_WEST.value and self.map[y][x+1] != BoardState.Wall:
+			self.robotLocation[1] += 1
+		
+		return self.getState()
 
-	def displayRound(self, round):
-		print('---------- Round '+str(round)+' ----------')
+	def isDone(self):
+		return False if self.numCans > 0 else True
 
 	def displayBoard(self):
 		print('\n')
@@ -89,18 +132,3 @@ class Game:
 						print(self.map[i][j].value, end="  ")
 				else:
 					print(self.map[i][j].value)
-	
-	def determineReward(self, state, action):
-		if action == Actions.PICK_UP.value:
-			if state[0] == BoardState.Can:
-				reward = 10
-			else:
-				reward = -5
-		else:
-			index = action.value
-			if state[index] == BoardState.Wall:
-				reward = -5
-			else:
-				reward = 1
-
-		return reward
