@@ -1,0 +1,4 @@
+No useful results.
+Model still plummets.
+
+Sadly, this proves that once the model chooses actions deliberatly that it is highly frequently choosing moveing over picking up cans.

@@ -40,7 +40,7 @@ class Agent():
 		self.lr = lr
 
 		# q network for action choice
-		self.Q_eval = DeepQNetwork(learning_rate=lr, input_dims=input_dims, fullyConnected1_dims=16, fullyConnected2_dims=16, number_of_actions=5)
+		self.Q_eval = DeepQNetwork(learning_rate=lr, input_dims=input_dims, fullyConnected1_dims=64, fullyConnected2_dims=64, number_of_actions=5)
 
 		# replay memory setup
 		self.action_space = [i for i in range(n_actions)]
@@ -53,7 +53,7 @@ class Agent():
 		self.new_state_memory = np.zeros((self.mem_size, *input_dims), dtype=np.float32)
 		self.action_memory = np.zeros(self.mem_size, dtype=np.int32)
 		self.reward_memory = np.zeros(self.mem_size, dtype=np.float32)
-		self.terminal_memory = np.zeros(self.mem_size, dtype=np.bool)
+		self.terminal_memory = np.zeros(self.mem_size, dtype=np.bool_)
 
 	def store_transition(self, state, action, reward, new_state, done):
 		first_unused_memory_index = self.mem_counter % self.mem_size
