@@ -1,0 +1,1 @@
+varing the LR between 0.001, 0.003, and 0.005 did not seem to have a significant change in the model's behavior.

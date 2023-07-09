@@ -6,9 +6,11 @@ class Game:
 	robotLocation = []
 	numCans = 0
 
-	def __init__(self, size=8, canDensity=0.25):
-		self.size = size
-		self.canDensity = canDensity
+	def __init__(self, size=5, num_cans=15):
+		self.size = size + 2
+		#self.canDensity = canDensity
+		self.numCans = num_cans
+		self.numCansLeft = self.numCans
 		self.initializeBoard()
 		self.initializeStartPointOfRobot()
 		return
@@ -16,41 +18,49 @@ class Game:
 	def initializeBoard(self):
 		for i in range(0, self.size):
 			row = []
-
 			for j in range(0,self.size):
 				if(self.isBorderWallTile(i, j)):
 					row.append(BoardState.Wall)
-				elif(self.isCanTile()):
-					row.append(BoardState.Can)
-					self.numCans += 1
 				else:
 					row.append(BoardState.Empty)
 			self.map.append(row.copy())
-
 			row.clear()
+		self.addCansToMap()
 		return
 
 	def isBorderWallTile(self, i, j):
 		if(i == 0 or j == 0 or i == self.size - 1 or j == self.size - 1):
 			return True
 		return False
+	
+	def addCansToMap(self):
+		self.numCansLeft = self.numCans
+		cans_to_add = self.numCansLeft
+		while cans_to_add > 0:
+			y = randint(1, self.size-2)
+			x = randint(1, self.size-2)
+			if(self.map[y][x] == BoardState.Can): continue
+			self.map[y][x] = BoardState.Can
+			cans_to_add -= 1
 
+
+	
+	'''
 	def isCanTile(self):
 		r = randint(0,100)/100
 		if(r <= self.canDensity):
 			return True
 		return False
+	'''
+
 
 	def initializeStartPointOfRobot(self):
 		for i in range(0,2):
 			self.robotLocation.append(randint(1,self.size-2))
-		print("Robot start at: ", end=" ")
-		print(self.robotLocation)
 
 	def reset(self):
 		self.map.clear()
 		self.robotLocation.clear()
-		self.numCans = 0
 		self.initializeBoard()
 		self.initializeStartPointOfRobot()
 		return self.getState()
@@ -81,7 +91,7 @@ class Game:
 		
 	def determineReward(self, action):
 		loc = self.robotLocation
-		if action == Actions.PICK_UP.value:
+		if action == 0:
 			if self.map[loc[0]][loc[1]] == BoardState.Can:
 				reward = 10
 			else:
@@ -89,37 +99,37 @@ class Game:
 		else:
 			ymod = 0
 			xmod = 0
-			if action == Actions.MOVE_NORTH.value: ymod -= 1
-			elif action == Actions.MOVE_SOUTH.value: ymod += 1
-			elif action == Actions.MOVE_EAST.value: xmod -= 1
-			elif action == Actions.MOVE_WEST.value: xmod += 1
+			if action == 1: ymod -= 1
+			elif action == 2: ymod += 1
+			elif action == 3: xmod -= 1
+			elif action == 4: xmod += 1
 			if self.map[loc[0]+ymod][loc[1]+xmod] == BoardState.Wall:
 				reward = -5
 			else:
-				reward = 0.25
+				reward = -1
 		return reward
 	
 	def applyAction(self, action):
 		y = self.robotLocation[0]
 		x = self.robotLocation[1]
 
-		if action == Actions.PICK_UP.value:
+		if action == 0:
 			if self.map[y][x] == BoardState.Can:
-				self.map[y][x] == BoardState.Empty
-				self.numCans -= 1
-		elif action == Actions.MOVE_NORTH.value and self.map[y-1][x] != BoardState.Wall:
+				self.map[y][x] = BoardState.Empty
+				self.numCansLeft -= 1
+		elif action == 1 and self.map[y-1][x] != BoardState.Wall:
 				self.robotLocation[0] -= 1
-		elif action == Actions.MOVE_SOUTH.value and self.map[y+1][x] != BoardState.Wall:
+		elif action == 2 and self.map[y+1][x] != BoardState.Wall:
 			self.robotLocation[0] += 1
-		elif action == Actions.MOVE_EAST.value and self.map[y][x-1] != BoardState.Wall:
+		elif action == 3 and self.map[y][x-1] != BoardState.Wall:
 			self.robotLocation[1] -= 1
-		elif action == Actions.MOVE_WEST.value and self.map[y][x+1] != BoardState.Wall:
+		elif action == 4 and self.map[y][x+1] != BoardState.Wall:
 			self.robotLocation[1] += 1
 		
 		return self.getState()
 
 	def isDone(self):
-		return False if self.numCans > 0 else True
+		return False if self.numCansLeft > 0 else True
 
 	def displayBoard(self):
 		print('\n')
@@ -132,3 +142,10 @@ class Game:
 						print(self.map[i][j].value, end="  ")
 				else:
 					print(self.map[i][j].value)
+
+
+
+'''# test area
+game = Game(4,16)
+game.displayBoard()
+print(game.numCans)'''

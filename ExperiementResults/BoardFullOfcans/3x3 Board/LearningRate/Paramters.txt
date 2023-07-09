@@ -1,0 +1,28 @@
+Experiment: Learning Rate
+   - 0.001, 0.003, 0.005
+
+DQN Layers
+ - input: 5
+ - hidden1: 16
+ - hidden2: 16
+ - output: 5
+
+Board Size: 3x3
+Num cans: 9 (full board)
+
+gamma = 0.99
+
+num games = 200
+
+epsilon_dec = 0.9 / (0.8 * num_games)
+ -- dec for 80% games, then 0.1
+
+batch size = 8
+
+rewards
+- pickup
+	- can: 10000
+	- no can: -10
+- move
+	- wall: -50
+	- empty: -5

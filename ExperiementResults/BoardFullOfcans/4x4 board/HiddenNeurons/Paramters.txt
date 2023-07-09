@@ -1,0 +1,26 @@
+Experiment: Reward Structure
+
+key: pick up can, puck up not can, move empty, move wall
+1) 10, -5, 0.1, -5
+2) 10, -5, -0.1, -5
+3) 10, -5, -1, -5
+
+learning rate: 0.003
+
+DQN Layers
+ - input: 5
+ - hidden1: 16
+ - hidden2: 16
+ - output: 5
+
+Board Size: 4x4
+Num cans: 16 (full board)
+
+gamma = 0.99
+
+num games = 768
+
+epsilon_dec = 0.9 / (0.8 * num_games)
+ -- dec for 80% games, then 0.1
+
+batch size = 8
