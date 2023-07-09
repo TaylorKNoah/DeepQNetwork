@@ -40,7 +40,7 @@ class Agent():
 		self.lr = lr
 
 		# q network for action choice
-		self.Q_eval = DeepQNetwork(learning_rate=lr, input_dims=input_dims, fullyConnected1_dims=64, fullyConnected2_dims=64, number_of_actions=6)
+		self.Q_eval = DeepQNetwork(learning_rate=lr, input_dims=input_dims, fullyConnected1_dims=64, fullyConnected2_dims=64, number_of_actions=5)
 
 		# replay memory setup
 		self.action_space = [i for i in range(n_actions)]
